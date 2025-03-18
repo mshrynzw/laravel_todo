@@ -81,10 +81,27 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         try {
+            Log::info('タスク削除開始', [
+                'task_id' => $task->id
+            ]);
+
+            if (!$task->exists) {
+                Log::error('タスクが見つかりません', ['task_id' => $task->id]);
+                return response()->json(['error' => 'タスクが見つかりません'], 404);
+            }
+
             $task->delete();
+
+            Log::info('タスク削除成功', [
+                'task_id' => $task->id
+            ]);
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            Log::error('タスク削除エラー: ' . $e->getMessage());
+            Log::error('タスク削除エラー', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage()
+            ]);
             return response()->json(['error' => 'タスクの削除に失敗しました'], 500);
         }
     }

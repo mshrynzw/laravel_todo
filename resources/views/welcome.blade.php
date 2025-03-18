@@ -119,25 +119,32 @@
 
                 async deleteTodo(id) {
                     try {
+                        // CSRFトークンを取得
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        
                         const response = await fetch(`/tasks/${id}`, {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': token
                             }
                         });
 
-                        if (!response.ok) {
-                            const data = await response.json();
-                            throw new Error(data.error || 'エラーが発生しました');
+                        if (response.status === 404) {
+                            throw new Error('タスクが見つかりません');
                         }
 
-                        // 成功したら配列からタスクを削除
+                        if (!response.ok) {
+                            const data = await response.json().catch(() => ({}));
+                            throw new Error(data.error || 'タスクの削除に失敗しました');
+                        }
+
                         this.todos = this.todos.filter(todo => todo.id !== id);
                         showToast('タスクを削除しました');
                     } catch (error) {
-                        console.error('Error details:', error);
-                        showToast(error.message || 'エラーが発生しました', 'error');
+                        console.error('削除エラー:', error);
+                        showToast(error.message || 'タスクの削除に失敗しました', 'error');
                     }
                 }
             }));
