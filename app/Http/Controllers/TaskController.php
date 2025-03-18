@@ -53,6 +53,11 @@ class TaskController extends Controller
                 'request_data' => $request->all()
             ]);
 
+            if (!$task->exists) {
+                Log::error('タスクが見つかりません', ['task_id' => $task->id]);
+                return response()->json(['error' => 'タスクが見つかりません'], 404);
+            }
+
             $validated = $request->validate([
                 'completed' => 'boolean|nullable',
                 'content' => 'string|max:255|nullable'
@@ -73,7 +78,10 @@ class TaskController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('タスク更新エラー: ' . $e->getMessage());
+            Log::error('タスク更新エラー', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage()
+            ]);
             return response()->json(['error' => 'タスクの更新に失敗しました'], 500);
         }
     }

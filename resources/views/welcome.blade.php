@@ -44,6 +44,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             },
                             body: JSON.stringify({
@@ -52,7 +53,7 @@
                         });
 
                         if (!response.ok) {
-                            const data = await response.json();
+                            const data = await response.json().catch(() => ({}));
                             throw new Error(data.error || 'エラーが発生しました');
                         }
 
@@ -61,7 +62,8 @@
                         this.newTaskText = '';
                         showToast('タスクを追加しました');
                     } catch (error) {
-                        showToast(error.message || 'エラーが発生しました', 'error');
+                        console.error('追加エラー:', error);
+                        showToast(error.message || 'タスクの追加に失敗しました', 'error');
                     }
                 },
 
@@ -71,6 +73,7 @@
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             },
                             body: JSON.stringify({
@@ -78,9 +81,13 @@
                             })
                         });
 
+                        if (response.status === 404) {
+                            throw new Error('タスクが見つかりません');
+                        }
+
                         if (!response.ok) {
-                            const data = await response.json();
-                            throw new Error(data.error || 'エラーが発生しました');
+                            const data = await response.json().catch(() => ({}));
+                            throw new Error(data.error || 'タスクの更新に失敗しました');
                         }
 
                         const updatedTask = await response.json();
@@ -88,8 +95,8 @@
                         todo.isEditing = false;
                         showToast('タスクを更新しました');
                     } catch (error) {
-                        console.error('Error details:', error);
-                        showToast(error.message || 'エラーが発生しました', 'error');
+                        console.error('更新エラー:', error);
+                        showToast(error.message || 'タスクの更新に失敗しました', 'error');
                     }
                 },
 
@@ -102,6 +109,7 @@
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'Accept': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             },
                             body: JSON.stringify({
@@ -109,11 +117,21 @@
                             })
                         });
 
+                        if (response.status === 404) {
+                            throw new Error('タスクが見つかりません');
+                        }
+
+                        if (!response.ok) {
+                            const data = await response.json().catch(() => ({}));
+                            throw new Error(data.error || 'ステータスの更新に失敗しました');
+                        }
+
                         const updatedTask = await response.json();
                         todo.completed = updatedTask.completed;
                         showToast(todo.completed ? 'タスクを完了しました' : 'タスクを未完了に戻しました');
                     } catch (error) {
-                        showToast('エラーが発生しました', 'error');
+                        console.error('ステータス更新エラー:', error);
+                        showToast(error.message || 'ステータスの更新に失敗しました', 'error');
                     }
                 },
 

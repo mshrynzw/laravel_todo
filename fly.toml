@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for laravel-todo-damp-sound-7502 on 2025-03-18T09:52:32+09:00
+# fly.toml app configuration file generated for laravel-todo-broken-leaf-8747 on 2025-03-18T10:08:40+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'laravel-todo-damp-sound-7502'
+app = 'laravel-todo-broken-leaf-8747'
 primary_region = 'nrt'
 console_command = 'php /var/www/html/artisan tinker'
 
